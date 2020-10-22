@@ -20,51 +20,24 @@ function Game() {
     status: gameSettingsLoadingStatus,
   } = useFetch('/server/game-settings.json');
   const [gameData, setGameData] = useState([]);
-  const shuffledData = useMemo(() => shuffle(gameData), [gameData, currentMode, shufflingIndex]);
+  const shuffledData = useMemo(() => shuffle(gameData), [
+    gameData,
+    currentMode,
+    shufflingIndex,
+  ]);
 
-  const [rows, columns] = gameSettings[currentMode]
-    ? gameSettings[currentMode].field.split('x')
-    : [];
-
-  const handleSquareClick = (id) => {
-    if (timerHasStarted && result[id] === 'blue') {
-      setResult((prevResult) => ({
-        ...prevResult,
-        [id]: 'green',
-      }));
-    }
-  };
-
-  const resetGame = () => {
-    setResult({});
-    setMessage(null);
-  };
-
-  const handlePlay = () => {
-    resetGame();
-    setCurrentIndex(0);
-    setGameHasStarted(true);
-    setShufflingIndex(index => index + 1);
-  };
-
-  const handleGameModeClick = () => {
-    setIsDropdownOpen((open) => !open);
-  };
-
-  const handleModeChange = (mode) => {
-    setCurrentMode(mode);
-    setIsDropdownOpen(false);
-    resetGame();
-  };
+  const [rows, columns] = useMemo(
+    () =>
+      gameSettings[currentMode]
+        ? gameSettings[currentMode].field.split('x')
+        : [],
+    [gameSettings, currentMode]
+  );
 
   useEffect(() => {
     const currentGame = gameSettings[currentMode];
 
-    if (
-      gameSettingsLoadingStatus === LOADED &&
-      currentGame.field
-    ) {
-      const [rows, columns] = currentGame.field.split('x');
+    if (gameSettingsLoadingStatus === LOADED && currentGame.field) {
       const gameSquares = new Array(Number(rows) * Number(columns))
         .fill(1)
         .map((el, index) => ({
@@ -72,7 +45,7 @@ function Game() {
         }));
       setGameData(gameSquares);
     }
-  }, [gameSettings, gameSettingsLoadingStatus, currentMode]);
+  }, [gameSettings, gameSettingsLoadingStatus, currentMode, rows, columns]);
 
   useEffect(() => {
     const resultsArray = Object.values(result);
@@ -115,7 +88,38 @@ function Game() {
     }
 
     return () => clearTimeout(timerId);
-  }, [gameHasStarted, gameData, currentIndex]);
+  }, [gameHasStarted, gameData, currentIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSquareClick = (id) => {
+    if (timerHasStarted && result[id] === 'blue') {
+      setResult((prevResult) => ({
+        ...prevResult,
+        [id]: 'green',
+      }));
+    }
+  };
+
+  const resetGame = () => {
+    setResult({});
+    setMessage(null);
+  };
+
+  const handlePlay = () => {
+    resetGame();
+    setCurrentIndex(0);
+    setGameHasStarted(true);
+    setShufflingIndex((index) => index + 1);
+  };
+
+  const handleGameModeClick = () => {
+    setIsDropdownOpen((open) => !open);
+  };
+
+  const handleModeChange = (mode) => {
+    setCurrentMode(mode);
+    setIsDropdownOpen(false);
+    resetGame();
+  };
 
   return (
     <div className="game-wrapper">

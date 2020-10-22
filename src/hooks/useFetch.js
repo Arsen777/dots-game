@@ -20,7 +20,7 @@ const useFetch = (url, options) => {
         setError(error);
       }
     })();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { response, error, status };
 };
