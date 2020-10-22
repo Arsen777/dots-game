@@ -147,8 +147,8 @@ function Game() {
         >
           {message ? 'PLAY AGAIN' : 'PLAY'}
         </button>
+        <div className="message">{message && <span>{message}</span>}</div>
       </div>
-      <div className="message">{message && <span>{message}</span>}</div>
       <div className="matrix">
         {rows &&
           Array(Number(rows))
