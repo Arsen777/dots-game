@@ -2,7 +2,9 @@ import React from 'react';
 
 function LeaderBoard() {
   return (
-    <div>LeaderBoard</div>
+    <div className="leader-board-wrapper">
+      LeaderBoard
+    </div>
   )
 }
 
