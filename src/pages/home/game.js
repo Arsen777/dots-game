@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import useFetch from 'hooks/useFetch';
 import shuffle from 'helpers/shuffle';
 import { LOADED } from 'constants/data';
+import { EASY, NORMAL, DIFFICULt } from 'constants/games';
 
 function Game() {
   const [gameHasStarted, setGameHasStarted] = useState(false);
@@ -12,7 +13,7 @@ function Game() {
   const [timerHasStarted, setTimerHasStarted] = useState(false);
   const [result, setResult] = useState({});
   const [message, setMessage] = useState();
-  const [mode, setMode] = useState('easy');
+  const [currentMode, setCurrentMode] = useState(EASY);
   const {
     response: gameSettings = {},
     status: gameSettingsLoadingStatus,
@@ -20,8 +21,8 @@ function Game() {
   const [gameData, setGameData] = useState([]);
   const shuffledData = useMemo(() => shuffle(gameData), [gameData]);
 
-  const [rows, columns] = gameData.length
-    ? gameSettings[mode]?.field.split('x')
+  const [rows, columns] = gameSettings[currentMode]
+    ? gameSettings[currentMode].field.split('x')
     : [];
 
   const handleSquareClick = (id) => {
@@ -33,10 +34,14 @@ function Game() {
     }
   };
 
-  const handlePlay = () => {
+  const resetGame = () => {
     setResult({});
     setMessage(null);
     setCurrentIndex(0);
+  };
+
+  const handlePlay = () => {
+    resetGame();
     setGameHasStarted(true);
   };
 
@@ -44,9 +49,18 @@ function Game() {
     setIsDropdownOpen((open) => !open);
   };
 
+  const handleModeChange = (mode) => {
+    setCurrentMode(mode);
+    setIsDropdownOpen(false);
+    resetGame();
+  };
+
   useEffect(() => {
-    if (gameSettingsLoadingStatus === LOADED && gameSettings[mode].field) {
-      const [rows, columns] = gameSettings[mode].field.split('x');
+    if (
+      gameSettingsLoadingStatus === LOADED &&
+      gameSettings[currentMode].field
+    ) {
+      const [rows, columns] = gameSettings[currentMode].field.split('x');
       const gameSquares = new Array(Number(rows) * Number(columns))
         .fill(1)
         .map((el, index) => ({
@@ -54,7 +68,7 @@ function Game() {
         }));
       setGameData(gameSquares);
     }
-  }, [gameSettings, gameSettingsLoadingStatus, mode]);
+  }, [gameSettings, gameSettingsLoadingStatus, currentMode]);
 
   useEffect(() => {
     const resultsArray = Object.values(result);
@@ -107,9 +121,16 @@ function Game() {
             <i className="arrow down" />
           </div>
           <div className={classNames('dropdown', { open: isDropdownOpen })}>
-            <div className="item">Difficult</div>
-            <div className="item">Normal</div>
-            <div className="item">Easy</div>
+            {[EASY, NORMAL, DIFFICULt].map((mode) => (
+              <div
+                className={classNames('mode', {
+                  selected: currentMode === mode,
+                })}
+                onClick={() => handleModeChange(mode)}
+              >
+                {mode}
+              </div>
+            ))}
           </div>
         </div>
         <input type="string" placeholder="Enter your name" />
