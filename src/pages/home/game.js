@@ -14,12 +14,13 @@ function Game() {
   const [result, setResult] = useState({});
   const [message, setMessage] = useState();
   const [currentMode, setCurrentMode] = useState(EASY);
+  const [shufflingIndex, setShufflingIndex] = useState(0);
   const {
     response: gameSettings = {},
     status: gameSettingsLoadingStatus,
   } = useFetch('/server/game-settings.json');
   const [gameData, setGameData] = useState([]);
-  const shuffledData = useMemo(() => shuffle(gameData), [gameData]);
+  const shuffledData = useMemo(() => shuffle(gameData), [gameData, currentMode, shufflingIndex]);
 
   const [rows, columns] = gameSettings[currentMode]
     ? gameSettings[currentMode].field.split('x')
@@ -37,12 +38,13 @@ function Game() {
   const resetGame = () => {
     setResult({});
     setMessage(null);
-    setCurrentIndex(0);
   };
 
   const handlePlay = () => {
     resetGame();
+    setCurrentIndex(0);
     setGameHasStarted(true);
+    setShufflingIndex(index => index + 1);
   };
 
   const handleGameModeClick = () => {
@@ -56,11 +58,13 @@ function Game() {
   };
 
   useEffect(() => {
+    const currentGame = gameSettings[currentMode];
+
     if (
       gameSettingsLoadingStatus === LOADED &&
-      gameSettings[currentMode].field
+      currentGame.field
     ) {
-      const [rows, columns] = gameSettings[currentMode].field.split('x');
+      const [rows, columns] = currentGame.field.split('x');
       const gameSquares = new Array(Number(rows) * Number(columns))
         .fill(1)
         .map((el, index) => ({
@@ -75,15 +79,14 @@ function Game() {
     const greens = resultsArray.filter((result) => result === 'green');
     const reds = resultsArray.filter((result) => result === 'red');
     const half = Math.floor(gameData.length / 2);
+    let timerId;
 
     if (greens.length > half) {
       setGameHasStarted(false);
-      setCurrentIndex(0);
       setMessage('Congrats! You have won');
       return;
     } else if (reds.length > half) {
       setGameHasStarted(false);
-      setCurrentIndex(0);
       setMessage('You have lost. Try again');
       return;
     }
@@ -100,7 +103,7 @@ function Game() {
         [game.id]: 'blue',
       }));
 
-      setTimeout(() => {
+      timerId = setTimeout(() => {
         setResult((prevResult) => ({
           ...prevResult,
           [game.id]: prevResult[game.id] === 'green' ? 'green' : 'red',
@@ -108,8 +111,10 @@ function Game() {
 
         setTimerHasStarted(false);
         setCurrentIndex((index) => index + 1);
-      }, 1000);
+      }, gameSettings[currentMode].delay);
     }
+
+    return () => clearTimeout(timerId);
   }, [gameHasStarted, gameData, currentIndex]);
 
   return (
@@ -123,6 +128,7 @@ function Game() {
           <div className={classNames('dropdown', { open: isDropdownOpen })}>
             {[EASY, NORMAL, DIFFICULt].map((mode) => (
               <div
+                key={mode}
                 className={classNames('mode', {
                   selected: currentMode === mode,
                 })}
@@ -135,7 +141,8 @@ function Game() {
         </div>
         <input type="string" placeholder="Enter your name" />
         <button
-          disabled={gameSettingsLoadingStatus !== LOADED}
+          disabled={gameSettingsLoadingStatus !== LOADED || gameHasStarted}
+          className={classNames({ disabled: gameHasStarted })}
           onClick={handlePlay}
         >
           {message ? 'PLAY AGAIN' : 'PLAY'}
@@ -147,13 +154,13 @@ function Game() {
           Array(Number(rows))
             .fill(1)
             .map((el, index) => (
-              <div className="row">
+              <div className="row" key={index}>
                 {shuffledData
-                  .slice(index * Number(rows), Number(rows) * (index + 1))
+                  .slice(Number(rows) * index, Number(rows) * (index + 1))
                   .map((data) => (
                     <div className="column" key={data.id}>
                       <div
-                        className={classNames('circle', result[data.id])}
+                        className={classNames('square', result[data.id])}
                         onClick={() => handleSquareClick(data.id)}
                       />
                     </div>

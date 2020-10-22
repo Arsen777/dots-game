@@ -12,7 +12,7 @@ function LeaderBoard() {
       </div>
       <div className="body">
         {leaders.map(leader => (
-          <div className="winner">
+          <div className="winner" key={leader.id}>
             <div>{leader.winner}</div>
             <div>{new Date(leader.date).toLocaleDateString('en-US')}</div>
           </div>
