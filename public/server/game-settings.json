@@ -1,0 +1,15 @@
+{
+  "easy": {
+    "field": "5x5",
+    "delay": 300
+  },
+  "normal": {
+    "field": "10x10",
+    "delay": 250
+  },
+  "difficult": {
+    "field": "20x20",
+    "delay": 200
+  }
+}
+
