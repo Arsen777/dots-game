@@ -14,12 +14,34 @@
       > * {
         margin-right: 10px;
       }
-      .dropdown {
+      .game-mode-dropdown {
         width: 140px;
         background-color: rgb(209, 216, 220);
         padding: 10px;
         border-radius: 5px;
-        cursor: pointer;
+        .game-mode {
+          height: 30px;
+          cursor: pointer;
+        }
+        .dropdown {
+          display: none;
+          &.open {
+            position: absolute;
+            background-color: #ffffff;
+            width: auto;
+            min-width: 144px;
+            box-shadow: 0 8px 20px rgba(#212121, 0.54);
+            border-radius: 5px;
+            padding: 20px 25px;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          & > .item {
+            cursor: pointer;
+          }
+        }
       }
       input {
         border: none;
@@ -32,6 +54,9 @@
         background-color: rgb(121, 141, 146);
         cursor: pointer;
       }
+    }
+    .message {
+      margin: 15px 0 0px 60px;
     }
     .matrix {
       margin: 55px 0;
@@ -64,7 +89,20 @@
   }
   .leader-board-wrapper {
     width: 33%;
-    border-left: 1px solid red;
+    border-left: 1px solid rgb(238, 238, 238);
+    .header {
+      padding: 20px;
+    }
+    .body {
+      padding: 20px;
+      .winner {
+        display: flex;
+        justify-content: space-between;
+        margin: 5px;
+        padding: 20px;
+        background-color: #d0d8dc;
+      }
+    }
   }
 }
 
